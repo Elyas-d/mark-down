@@ -1,3 +1,25 @@
+## 👥 Group Members
+
+| Name                | Student ID     |
+|---------------------|----------------|
+| Yabets Zekaryas     | Ugr/25317/14   |
+| Elyas  Damenu       | Ugr/25386/14   |
+| Mahlet Demeke       | Ugr/25398/14   |
+| Meron Tilahun       | Ugr/25700/14   |
+| Yididya Tesfaye     | Ugr/25471/14   |
+
+# 📘 Project Description – Recipe Voyager
+
+Recipe Voyager is a privacy-conscious recipe discovery platform that provides users with a fast, structured, and intuitive way to explore global cuisines. Built with performance, accessibility, and privacy in mind, the portal leverages open APIs to fetch meal data while ensuring user anonymity throughout the experience.
+
+🛠️ Technologies Used
+
+    Frontend: React (with TypeScript)
+    Routing: React Router
+    UI Components: ShadCN UI, Tailwind CSS
+    API Integration: TheMealDB REST API
+    SEO & Markup: React Helmet, Schema.org JSON-LD
+
 index.tsx
 ---------
 
@@ -422,21 +444,13 @@ after that if the recipes found show them using
 > This Next.js component is responsible for fetching and displaying a recipe based on a URL parameter (id). It handles loading states, error cases, and conditional rendering.
 
 **Step-by-step Breakdown:** Extract id from URL using useParams.
-
 *   Redirect to homepage if id is missing or invalid.
-    
 *   Fetch recipe data using getRecipeById(id):
-    
 *   If the recipe is found, it’s stored in the state.
-    
 *   If not, an error message is shown and the user is redirected.
-    
 *   While loading, show skeleton placeholders for a better user experience.
-    
 *   If loading is done but no recipe was fetched, render nothing (return null).
-    
 *   If recipe is fetched successfully, render the component with the recipe data.
-    
 
 This pattern ensures that users see a smooth loading state, clear error feedback, and only valid content.
 
@@ -534,4 +548,139 @@ const RecipeDetail = ({ recipe }: RecipeDetailProps) => {
         "text": step.trim() + (step.endsWith('.') ? '' : '.')
       }))
   };
+  return (
+    <>
+      <Helmet>
+        <title>{recipe.strMeal} - Recipe Voyager</title>
+        <meta name="description" content={`${recipe.strMeal} - An authentic ${recipe.strArea} ${recipe.strCategory.toLowerCase()} recipe with step-by-step instructions.`} />
+        <script type="application/ld+json">
+          {JSON.stringify(schemaData)}
+        </script>
+      </Helmet>
+    
+      <div className="recipe-container py-8">
+        <div className="mb-6">
+          <Link to="/">
+            <Button variant="ghost" className="mb-4 p-0 hover:bg-transparent">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to recipes
+            </Button>
+          </Link>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">{recipe.strMeal}</h1>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <Badge className="bg-recipe-primary hover:bg-recipe-primary/90">
+              {recipe.strCategory}
+            </Badge>
+            <Badge variant="outline">{recipe.strArea} Cuisine</Badge>
+            {recipe.strTags && recipe.strTags.split(',').map(tag => (
+              <Badge key={tag} variant="secondary" className="bg-muted">
+                {tag.trim()}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="rounded-xl overflow-hidden">
+            <img 
+              src={recipe.strMealThumb} 
+              alt={recipe.strMeal}
+              className="w-full h-auto object-cover aspect-video"
+              loading="eager" // Use eager loading for the main image above the fold
+              fetchpriority="high"
+            />
+          </div>
+
+          <div>
+            <div className="flex space-x-4 mb-6">
+              <Button
+                variant={activeTab === "ingredients" ? "default" : "outline"}
+                onClick={() => setActiveTab("ingredients")}
+                className={activeTab === "ingredients" ? "bg-recipe-primary hover:bg-recipe-primary/90" : ""}
+              >
+                Ingredients
+              </Button>
+              <Button
+                variant={activeTab === "instructions" ? "default" : "outline"}
+                onClick={() => setActiveTab("instructions")}
+                className={activeTab === "instructions" ? "bg-recipe-primary hover:bg-recipe-primary/90" : ""}
+              >
+                Instructions
+              </Button>
+            </div>
+
+            {activeTab === "ingredients" ? (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold">
+                  Ingredients ({recipe.ingredients.length})
+                </h2>
+                <ul className="space-y-2">
+                  {recipe.ingredients.map((item, index) => (
+                    <li key={index} className="flex items-center py-1">
+                      <span className="font-medium mr-2">•</span>
+                      <span className="font-medium">{item.measure}</span>
+                      <Separator orientation="vertical" className="mx-2 h-4" />
+                      <span>{item.ingredient}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold">Cooking Instructions</h2>
+                {renderInstructions()}
+              </div>
+            )}
+            {recipe.strYoutube && (
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-2">Video Tutorial</h3>
+                <Button
+                  variant="outline"
+                  className="text-recipe-primary border-recipe-primary hover:bg-recipe-primary/10"
+                  onClick={() => window.open(recipe.strYoutube, "_blank")}
+                >
+                  Watch on YouTube
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default RecipeDetail;
 ```
+> This code does the following:
+- Displays a detailed view of a selected recipe.
+- Uses structured schema.org JSON-LD for SEO.
+- Implements a tab switcher to toggle between "Ingredients" and "Instructions".
+- Splits cooking instructions into individual steps for better readability.
+- Includes badges for category, cuisine, and tags.
+- Uses eager loading with fetchpriority="high" for the main image.
+- Provides a YouTube video button if available.
+
+## ✅ SEO & Privacy Implementation
+
+### 🔍 SEO Optimization
+
+- **Meta Tags & Structured Data**:  
+  Added basic meta tags (`<title>`, `<meta name="description">`) and [schema.org](https://schema.org/Recipe) structured data using `<script type="application/ld+json">` to improve search engine visibility and semantic understanding.
+
+- **Performance & Core Web Vitals**:
+  - Implemented **lazy loading** for images across recipe listings to improve load speed and reduce unused bytes.
+  - Used `loading="eager"` and `fetchpriority="high"` only for above-the-fold images to ensure fast **Largest Contentful Paint (LCP)**.
+  - Ensured optimized image display with proper `width`, `height`, and aspect ratios.
+
+---
+
+### 🛡️ Privacy Enhancements
+
+- **No Tracking or Profiling**:
+  - Our application does **not** use any form of tracking (e.g., Google Analytics, Facebook Pixel).
+  - No cookies are used for profiling or behavioral analysis.
+  - No third-party scripts are included that could compromise user anonymity.
+  - As a result, users can interact with our platform without sacrificing their **privacy** or leaving digital footprints.
+
+✅ With these measures, we ensure a **privacy-conscious**, performant, and search-engine-friendly experience.
